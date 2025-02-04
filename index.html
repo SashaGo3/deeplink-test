@@ -145,8 +145,8 @@
     <script>
         function updateUrlParam(url) {
             if (url) {
-                // Create clean URL without encoding special characters
                 const baseUrl = window.location.href.split('?')[0];
+                // Just use the raw URL to preserve all characters
                 const cleanUrl = baseUrl + '?deeplink=' + url;
                 window.history.replaceState({}, '', cleanUrl);
             } else {
@@ -162,19 +162,25 @@
 
         // Check if there's a deeplink parameter in the URL when the page loads
         window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const deeplink = params.get('deeplink');
-            if (deeplink) {
-                // Decode the URL parameter to show clean URL in input
-                document.getElementById('urlInput').value = decodeURIComponent(deeplink);
+            // Get the raw query string and extract the deeplink value
+            const queryString = window.location.search;
+            const deeplinkMatch = queryString.match(/[?&]deeplink=([^&]+)/);
+            if (deeplinkMatch) {
+                const deeplink = deeplinkMatch[1];
+                document.getElementById('urlInput').value = deeplink;
             }
         };
 
         // Listen for browser back/forward navigation
         window.addEventListener('popstate', function() {
-            const params = new URLSearchParams(window.location.search);
-            const deeplink = params.get('deeplink');
-            document.getElementById('urlInput').value = deeplink ? decodeURIComponent(deeplink) : '';
+            const queryString = window.location.search;
+            const deeplinkMatch = queryString.match(/[?&]deeplink=([^&]+)/);
+            if (deeplinkMatch) {
+                const deeplink = deeplinkMatch[1];
+                document.getElementById('urlInput').value = deeplink;
+            } else {
+                document.getElementById('urlInput').value = '';
+            }
         });
 
         function openDeeplink() {
