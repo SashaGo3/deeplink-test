@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deeplink Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .url-input:focus {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.1);
+        }
+
+        .fancy-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 300px;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* iPhone SE and smaller devices */
+        @media screen and (max-width: 375px) {
+            .title {
+                font-size: 20px;
+            }
+            .url-input {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+            .fancy-button {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+        }
+
+        /* iPhone 14 Pro Max and larger devices */
+        @media screen and (min-width: 428px) {
+            .container {
+                gap: 25px;
+            }
+            .title {
+                font-size: 28px;
+            }
+        }
+
+        .fancy-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .fancy-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .fancy-button:active {
+            transform: translateY(1px);
+        }
+
+        .fancy-button:hover:before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Verify deeplink below</h1>
+        <input type="url" class="url-input" placeholder="Enter URL (e.g., fb://profile/123)" id="urlInput" required>
+        <button class="fancy-button" onclick="openDeeplink()">Open Deeplink</button>
+    </div>
+
+    <script>
+        function updateUrlParam(url) {
+            if (url) {
+                // Create clean URL without encoding special characters
+                const baseUrl = window.location.href.split('?')[0];
+                const cleanUrl = baseUrl + '?deeplink=' + url;
+                window.history.replaceState({}, '', cleanUrl);
+            } else {
+                const baseUrl = window.location.href.split('?')[0];
+                window.history.replaceState({}, '', baseUrl);
+            }
+        }
+
+        // Update URL parameter when input changes
+        document.getElementById('urlInput').addEventListener('input', function(e) {
+            updateUrlParam(e.target.value);
+        });
+
+        // Check if there's a deeplink parameter in the URL when the page loads
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const deeplink = params.get('deeplink');
+            if (deeplink) {
+                // Decode the URL parameter to show clean URL in input
+                document.getElementById('urlInput').value = decodeURIComponent(deeplink);
+            }
+        };
+
+        // Listen for browser back/forward navigation
+        window.addEventListener('popstate', function() {
+            const params = new URLSearchParams(window.location.search);
+            const deeplink = params.get('deeplink');
+            document.getElementById('urlInput').value = deeplink ? decodeURIComponent(deeplink) : '';
+        });
+
+        function openDeeplink() {
+            const urlInput = document.getElementById('urlInput');
+            if (urlInput.checkValidity()) {
+                const url = urlInput.value;
+                // Directly redirect to the deeplink URL
+                window.location.href = url;
+            }
+        }
+    </script>
+</body>
+</html>
